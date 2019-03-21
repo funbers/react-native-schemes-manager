@@ -123,20 +123,23 @@ fi
 
 BUNDLE_FILE="$DEST/main.jsbundle"
 
-$NODE_BINARY "$CLI_PATH" $BUNDLE_COMMAND \
-  $CONFIG_ARG \
-  --entry-file "$ENTRY_FILE" \
-  --platform ios \
-  --dev $DEV \
-  --reset-cache \
-  --bundle-output "$BUNDLE_FILE" \
-  --assets-dest "$DEST" \
-	$EXTRA_PACKAGER_ARGS
+# don't bundle in DEV mode
+if [[ $DEV != true ]]; then
+  $NODE_BINARY "$CLI_PATH" $BUNDLE_COMMAND \
+    $CONFIG_ARG \
+    --entry-file "$ENTRY_FILE" \
+    --platform ios \
+    --dev $DEV \
+    --reset-cache \
+    --bundle-output "$BUNDLE_FILE" \
+    --assets-dest "$DEST" \
+  	$EXTRA_PACKAGER_ARGS
 
-# XCode randomly generates user specific workspace files whenever it feels like it.
-# We want these hidden at all times, so go ahead and clean up if they're showing now.
-cd "$SCHEMES_MANAGER_DIR/../.."
-$NODE_BINARY "$SCHEMES_MANAGER_DIR/index.js" hide-library-schemes
+  # XCode randomly generates user specific workspace files whenever it feels like it.
+  # We want these hidden at all times, so go ahead and clean up if they're showing now.
+  cd "$SCHEMES_MANAGER_DIR/../.."
+  $NODE_BINARY "$SCHEMES_MANAGER_DIR/index.js" hide-library-schemes
+fi
 
 if [[ $DEV != true && ! -f "$BUNDLE_FILE" ]]; then
   echo "error: File $BUNDLE_FILE does not exist. This must be a bug with" >&2
